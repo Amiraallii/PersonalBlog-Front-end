@@ -1,0 +1,79 @@
+.rmdp-calendar {
+  background-color: #0d1b2a !important; /* یا var(--surface) اگر توی css داری */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* بخش تولبار پایین تقویم */
+.rmdp-toolbar {
+  background-color: #0d1b2a !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 10px !important;
+}
+
+/* طلایی کردن دکمه امروز (کاملاً ست با دکمه‌های فرمت) */
+.rmdp-toolbar button {
+  background-color: #e9c46a !important; /* رنگ طلایی دکمه‌های افزون محتوای تو */
+  color: #050c14 !important; /* متن تیره روی دکمه طلایی */
+  padding: 8px 0 !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: bold !important;
+  transition: all 0.2s ease-in-out !important;
+  border: none !important;
+  cursor: pointer !important;
+  width: 100% !important;
+}
+
+.rmdp-toolbar button:hover {
+  opacity: 0.9 !important;
+  transform: scale(0.98);
+}
+
+/* رنگ هدر تقویم (ماه و سال) */
+.rmdp-header-values {
+  color: #dfa106 !important;
+  font-weight: bold !important;
+}
+
+/* رنگ فلش‌های ناوبری چپ و راست */
+.rmdp-arrow-container:hover {
+  background-color: rgba(233, 196, 106, 0.2) !important;
+}
+.rmdp-arrow {
+  border: solid #e9c46a !important;
+  border-width: 0 2px 2px 0 !important;
+}
+
+/* رنگ روزهای هفته (شنه، یکشنبه...) */
+.rmdp-week-day {
+  color: #a0aec0 !important;
+  font-weight: 600 !important;
+}
+
+/* رنگ روزهای عادی ماه */
+.rmdp-day span {
+  color: #e2e8f0 !important;
+}
+
+/* هاور روی روزهای تقویم */
+.rmdp-day:not(.rmdp-disabled):not(.rmdp-day-hidden) span:hover {
+  background-color: #e9c46a !important;
+  color: #050c14 !important;
+}
+
+/* استایل روز انتخاب شده (دایره طلایی وسط) */
+.rmdp-day.rmdp-selected span {
+  background-color: #e9c46a !important;
+  color: #050c14 !important;
+  font-weight: bold !important;
+  box-shadow: 0 0 12px rgba(233, 196, 106, 0.4) !important;
+}
+
+/* استایل دایره دور روزِ امروز */
+.rmdp-day.rmdp-today span {
+  border: 1px solid #e9c46a !important;
+  background-color: transparent !important;
+  color: #e9c46a !important;
+}

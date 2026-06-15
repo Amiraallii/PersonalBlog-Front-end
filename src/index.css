@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #003153;
+  --primary-deep: #001D2E;
+  --background: #071521; 
+  --surface: #0B2233;    
+  --text: #F2F6FA;       
+  --muted: #B7C3CF;      
+  --border: #16364C;     
+  --accent: #C8A24A;      
+  --accent-hover: #A8832C;
+}
+
+@theme {
+  --font-sans: 'Vazirmatn', sans-serif;
+  --color-theme-bg: var(--background);
+  --color-theme-surface: var(--surface);
+}
+
+body {
+  font-family: 'Vazirmatn', sans-serif;
+  background-color: var(--background); 
+  color: var(--text);
+  direction: rtl; 
+  margin: 0;
+  padding: 0;
+}
+
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 49, 83, 0.3);
+}
+
+.text-theme { color: var(--text); }
+.text-muted { color: var(--muted); }
+.border-theme { border-color: var(--border); }
+
+.btn-accent {
+  background-color: var(--accent);
+  color: #000000; 
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.active_nav {
+  color: var(--accent);
+  position: relative;
+  padding: 0.375rem 0.75rem;
+  font-weight: 700;
+}
+
+.active_nav::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  right: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+}
+
+.inactive_nav {
+  color: var(--text);
+  padding: 0.375rem 0.75rem;
+  transition: color 0.3s ease;
+}
+
+.inactive_nav:hover {
+  color: var(--accent);
+}
