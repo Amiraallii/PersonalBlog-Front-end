@@ -1,17 +1,18 @@
 export interface Comment {
-  id: string | number;
-  postId: string | number;
+  id: string ;
+  postId: string ;
   content: string;
   createdAt: string;
   authorId: string;
+  replyCount: string | number;
   authorName: string;
-  parentId: string | number | null;
+  parentId: string | null;
 }
 
 export interface CreateCommentDTO {
-  postId: string | number;
+  postId: string ;
   content: string;
-  parentId: string | number | null;
+  parentId: string | null;
 }
 
 export interface CommentResponse {

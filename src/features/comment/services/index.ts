@@ -14,5 +14,16 @@ export const CommentService = {
 
   delete: async (id: string | number): Promise<void> => {
     await api.delete(`/Comment/DeleteComment?id=${id}`);
+  },
+
+  getReplies: async (parentId: string, skip: number = 0, pageSize: number = 10): Promise<CommentResponse> => {
+    const response = await api.get<CommentResponse>("/Comment/GetCommentReplies", {
+      params: {
+        ParentId: parentId,
+        Skip: skip,
+        PageSize: pageSize
+      }
+    });
+    return response.data;
   }
 };

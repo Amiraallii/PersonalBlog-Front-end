@@ -20,13 +20,13 @@ import { useInfiniteScroll } from "../../../hooks/useInfiniteScroll";
 interface CommentModalProps {
   isOpen: boolean;
   closeModal: () => void;
-  postId: string | number;
+  postId: string;
 }
 
 const CommentModal = ({ isOpen, closeModal, postId }: CommentModalProps) => {
   const { isAuthenticated } = useAuth();
   const [localComments, setLocalComments] = useState<Comment[]>([]);
-  const [parentId, setParentId] = useState<string | number | null>(null);
+  const [parentId, setParentId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const PAGE_SIZE = 10;
@@ -108,7 +108,7 @@ const CommentModal = ({ isOpen, closeModal, postId }: CommentModalProps) => {
 
   return (
     <Transition show={isOpen}>
-      <Dialog as="div" className="relative z-50" onClose={closeModal}>
+      <Dialog as="div" className="relative z-[2000]" onClose={closeModal}>
         <TransitionChild
           enter="ease-out duration-300"
           enterFrom="opacity-0"

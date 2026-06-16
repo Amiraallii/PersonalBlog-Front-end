@@ -1,15 +1,17 @@
-import { useState, type TouchEvent } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { convertToJalali } from "../../../utils/dateHelper";
 import type { Comment } from "../types";
+import { useLongPress } from "../../../hooks/useLongPress";
+import { useState } from "react";
 
 interface CommentItemProps {
   comment: Comment;
-  setParentId: (id: string | number | null) => void;
+  setParentId: (id: string | null) => void;
   isSubmitting: boolean;
   onDeleteSuccess: (id: string | number) => void;
   onActionStart: () => void;
   onActionEnd: () => void;
+  onShowRepliesClick?: (commentId: string | number) => void;
 }
 
 const CommentItem = ({
@@ -18,44 +20,26 @@ const CommentItem = ({
   isSubmitting,
   onDeleteSuccess,
   onActionStart,
-  onActionEnd
+  onActionEnd,
+  onShowRepliesClick,
 }: CommentItemProps) => {
-  const [swipeOffset, setSwipeOffset] = useState<number>(0);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [startX, setStartX] = useState<number>(0);
-  
+  const [showActionMenu, setShowActionMenu] = useState<boolean>(false);
+  const [areRepliesVisible, setAreRepliesVisible] = useState<boolean>(false);
   const { currentUserId } = useAuth();
   const isOwner = comment.authorId === currentUserId;
 
-  const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
-    setStartX(e.touches[0].clientX);
-    setIsDragging(true);
-  };
-
-  const handleTouchMove = (e: TouchEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
-    const currentX = e.touches[0].clientX;
-    const diff = currentX - startX;
-    
-    if (isOwner && diff < 0) {
-      setSwipeOffset(Math.max(diff, -80));
-    } else if (diff > 0) {
-      setSwipeOffset(Math.min(diff, 160));
-    }
-  };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-    if (swipeOffset < -40) {
-      setSwipeOffset(-80);
-    } else if (swipeOffset > 40 && swipeOffset < 100) {
-      setSwipeOffset(80);
-    } else if (swipeOffset >= 100) {
-      setSwipeOffset(160);
-    } else {
-      setSwipeOffset(0);
-    }
-  };
+  const replyCountNumber = Number(comment.replyCount || 0);
+  const longPressHooks = useLongPress({
+    onLongPress: () => {
+      setShowActionMenu(true);
+    },
+    onClick: () => {
+      if (replyCountNumber > 0) {
+        handleToggleReplies();
+      }
+    },
+    delay: 1000, 
+  });
 
   const handleDelete = async () => {
     onActionStart();
@@ -63,71 +47,89 @@ const CommentItem = ({
       onDeleteSuccess(comment.id);
     } finally {
       onActionEnd();
-      setSwipeOffset(0);
     }
   };
-
-  const handleReply = () => {
+  const handleReplyClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setParentId(comment.id);
-    setSwipeOffset(0);
   };
-
+  const handleToggleReplies = () => {
+    const nextState = !areRepliesVisible;
+    setAreRepliesVisible(nextState);
+    
+    onShowRepliesClick?.(comment.id);
+  };
   return (
-    <div className="relative overflow-hidden bg-[var(--surface)] mb-4">
-      <div className="absolute inset-0 flex justify-between">
-        {isOwner && (
-          <button
-            onClick={handleDelete}
-            disabled={isSubmitting}
-            className="absolute right-1 top-1 bottom-1 w-20 bg-red-500 flex items-center justify-center rounded-lg"
-          >
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
-        )}
-        <div className="absolute left-1 top-1 bottom-1 flex gap-1">
-          <button
-            onClick={handleReply}
-            disabled={isSubmitting}
-            className="w-20 bg-blue-500 flex items-center justify-center rounded-lg"
-          >
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-            </svg>
-          </button>
-          <button
-            onClick={() => setSwipeOffset(0)}
-            disabled={isSubmitting}
-            className="w-20 bg-gray-500 flex items-center justify-center rounded-lg"
-          >
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </button>
+    <div className="relative w-full bg-[var(--surface)] mb-2 rounded-xl border border-[var(--border)] p-3 transition-colors select-none">
+      
+      <div {...longPressHooks} className="flex gap-3 active:bg-[rgba(255,255,255,0.02)] rounded-lg p-1 transition-colors cursor-pointer">
+        <div className="w-9 h-9 bg-[var(--accent)] text-black font-bold rounded-full flex items-center justify-center text-sm flex-shrink-0 shadow-sm">
+          {comment.authorName?.charAt(0) || "؟"}
+        </div>
+        
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="font-semibold text-sm text-[var(--text)] truncate">{comment.authorName}</span>
+            <span className="text-[10px] text-[var(--muted)]">{convertToJalali(comment.createdAt)}</span>
+          </div>
+          <p className="text-sm text-[var(--text)] leading-relaxed whitespace-pre-line break-words">{comment.content}</p>
+          
+          <div className="flex items-center gap-4 mt-2">
+            <button 
+              onClick={handleReplyClick}
+              className="text-xs text-[var(--muted)] hover:text-[var(--accent)] font-medium transition-colors"
+            >
+              پاسخ
+            </button>
+          </div>
         </div>
       </div>
 
-      <div
-        className="relative bg-[var(--surface)] transition-transform duration-200 ease-out touch-pan-y"
-        style={{ transform: `translateX(${swipeOffset}px)` }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        <div className="flex gap-3 pb-4 border-b border-[var(--border)] last:border-0 bg-[var(--surface)] p-2">
-          <div className="w-10 h-10 bg-[var(--accent)] rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-            {comment.authorName?.charAt(0) || "؟"}
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-semibold text-[var(--text)]">{comment.authorName}</span>
-              <span className="text-xs text-[var(--muted)]">{convertToJalali(comment.createdAt)}</span>
+      {replyCountNumber > 0 && (
+        <div className="flex items-center gap-3 mt-3 mr-12">
+          <span className="w-8 h-[1px] bg-[var(--border)] inline-block"></span>
+          <button
+            onClick={(e) => { e.stopPropagation(); handleToggleReplies(); }}
+            className="text-xs text-[var(--accent)] font-semibold hover:underline"
+          >
+            {areRepliesVisible ? "پنهان کردن پاسخ‌ها" : `مشاهده همه پاسخ‌ها (${comment.replyCount})`}
+          </button>
+        </div>
+      )}
+
+      {showActionMenu && (
+        <div className="fixed inset-0 z-[2000] bg-black/60 backdrop-blur-sm flex items-end justify-center p-4 animate-fade-in" onClick={() => setShowActionMenu(false)}>
+          <div className="w-full max-w-sm bg-[var(--surface)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-2xl p-2 animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center py-3 border-b border-[var(--border)] text-xs text-[var(--muted)]">
+              مدیریت کامنت {comment.authorName}
             </div>
-            <p className="text-[var(--text)] leading-relaxed whitespace-pre-line">{comment.content}</p>
+            
+            {isOwner ? (
+              <button 
+                onClick={handleDelete}
+                disabled={isSubmitting}
+                className="w-full text-center py-3.5 text-sm font-bold text-red-500 hover:bg-red-500/10 rounded-xl transition-colors"
+              >
+                پاک کردن کامنت
+              </button>
+            ) : (
+              <button 
+                onClick={() => { setShowActionMenu(false); alert("گزارش تخلف ثبت شد."); }}
+                className="w-full text-center py-3.5 text-sm font-bold text-orange-500 hover:bg-orange-500/10 rounded-xl transition-colors"
+              >
+                گزارش دادن (Report)
+              </button>
+            )}
+            
+            <button 
+              onClick={() => setShowActionMenu(false)}
+              className="w-full text-center py-3.5 text-sm font-medium text-[var(--text)] bg-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.05)] mt-1 rounded-xl transition-colors"
+            >
+              انصراف
+            </button>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
