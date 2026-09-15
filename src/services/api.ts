@@ -1,9 +1,10 @@
 import axios from "axios";
+import { env } from "../config/env";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://api.amirali.me";
 
 export const api = axios.create({
-  baseURL: API_URL,
+  baseURL: env.apiUrl,
   headers: {
     "Content-Type": "application/json",
   },
