@@ -8,7 +8,22 @@ import { PostService } from "../services/index";
 import { convertToJalali } from "../../../utils/dateHelper";
 import { useInfiniteScroll } from "../../../hooks/useInfiniteScroll";
 import PageCacheManager from "../../../components/PageCacheManager";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
+import { env } from "../../../config/env";
+import type { Post } from "../types";
+
+interface PostItemsContentProps {
+  cachedItems: Post[];
+  cachedHasNextPage: boolean;
+  cachedTotalCount: number;
+  scrollY: number;
+  saveCache: (
+    items: Post[],
+    skip: number,
+    hasNextPage: boolean,
+    totalCount: number,
+  ) => void;
+}
 
 const PostItemsContent = ({
   cachedItems,
@@ -16,10 +31,29 @@ const PostItemsContent = ({
   cachedTotalCount,
   scrollY,
   saveCache,
-}: any) => {
+}: PostItemsContentProps) => {
   const navigate = useNavigate();
-  const BucketAdd = "https://c110685.parspack.net/c110685";
   const PAGE_SIZE = 10;
+  const fetchPosts = useCallback(
+    async (currentSkip: number) => {
+      if (cachedItems.length > 0 && currentSkip === 0) {
+        return {
+          items: cachedItems,
+          hasNextPage: cachedHasNextPage,
+          totalCount: cachedTotalCount,
+        };
+      }
+
+      const data = await PostService.getAll(PAGE_SIZE, currentSkip);
+
+      return {
+        items: data.items ?? [],
+        hasNextPage: data.hasNextPage,
+        totalCount: data.totalCount ?? 0,
+      };
+    },
+    [cachedItems, cachedHasNextPage, cachedTotalCount],
+  );
   const {
     items: posts,
     isLoading,
@@ -28,22 +62,7 @@ const PostItemsContent = ({
     totalCount,
   } = useInfiniteScroll({
     pageSize: PAGE_SIZE,
-    fetchData: async (currentSkip) => {
-      if (cachedItems.length > 0 && currentSkip === 0) {
-        return {
-          items: cachedItems,
-          hasNextPage: cachedHasNextPage,
-          totalCount: cachedTotalCount,
-        };
-      }
-      const data = await PostService.getAll(PAGE_SIZE, currentSkip);
-
-      return {
-        items: data.items || [],
-        hasNextPage: data.hasNextPage,
-        totalCount: data.totalCount || 0,
-      };
-    },
+    fetchData: fetchPosts,
   });
   useEffect(() => {
     if (posts.length > 0 && scrollY > 0) {
@@ -59,7 +78,7 @@ const PostItemsContent = ({
     if (posts.length > 0) {
       saveCache(posts, posts.length, hasNextPage, totalCount);
     }
-  }, [posts.length, hasNextPage, totalCount]);
+  }, [posts, hasNextPage, totalCount, saveCache]);
 
   return (
     <>
@@ -99,11 +118,12 @@ const PostItemsContent = ({
                 <div className="w-full md:w-1/3 lg:w-1/4 h-48 md:h-full relative overflow-hidden">
                   {post.coverImageAddress ? (
                     <img
-                      src={`${BucketAdd}/${post.coverImageAddress}`}
+                      src={`${env.mediaBaseUrl}/${post.coverImageAddress}`}
                       alt={post.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      onError={(e: any) => {
-                        e.target.src = "https://via.placeholder.com/1080x720";
+                      onError={(event) => {
+                        event.currentTarget.src =
+                          "/images/placeholder-post.png";
                       }}
                     />
                   ) : (
@@ -136,7 +156,7 @@ const PostItemsContent = ({
 
                     <button
                       onClick={() => navigate(`/Posts/postdetail/${post.id}`)}
-                      className="text-xs bg-[rgba(255,255,255,0.05)] hover:bg-[var(--accent)] hover:text-black text-[var(--text)] border border border-[var(--border)] px-4 py-2 rounded-lg transition-all duration-300"
+                      className="text-xs bg-[rgba(255,255,255,0.05)] hover:bg-[var(--accent)] hover:text-black text-[var(--text)] border border-[var(--border)] px-4 py-2 rounded-lg transition-all duration-300"
                     >
                       مشاهده کامل
                     </button>
@@ -166,7 +186,7 @@ const PostItemsContent = ({
 
 export default function PostItems() {
   return (
-    <PageCacheManager cacheKey="postS_list">
+    <PageCacheManager<Post> cacheKey="posts_list">
       {(cacheProps) => <PostItemsContent {...cacheProps} />}
     </PageCacheManager>
   );

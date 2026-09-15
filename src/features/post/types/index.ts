@@ -1,3 +1,5 @@
+import type { PostContent, PostContentFormState } from "./postContent";
+
 export interface PostResponse {
   items: Post[];
   totalCount: number;
@@ -10,14 +12,6 @@ export interface CreatePostDTO {
   summary: string;
   coverImage: string;
   postContents: PostContent[] | null;
-}
-
-export interface PostContent {
-  content: string;
-  contentType: number;
-  order: number;
-  media: File | null;         
-  mediaAddress?: string | null;
 }
 
 export interface Post {
@@ -36,5 +30,7 @@ export interface CreatePostFormState {
   summary: string;
   coverImage: File | null;
   coverImageAddress?: string;
-  postContents: PostContent[];
+  postContents: PostContentFormState[];
 }
+
+export type { PostContent, PostContentFormState } from "./postContent";
