@@ -9,33 +9,23 @@ import {
 } from "@heroicons/react/16/solid";
 import { convertToJalali } from "../../../utils/dateHelper";
 import type { Project } from "../types";
-
+const formatLink = (link: string): string => {
+  if (!link) return "#";
+  if (link.startsWith("http://") || link.startsWith("https://")) {
+    return link;
+  }
+  return `https://${link}`;
+};
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [projectDetail, setProjectDetail] = useState<Project>();
-//   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const formatLink = (link:string) => {
-    if (!link) return "#";
-    if (link.startsWith("http://") || link.startsWith("https://")) {
-      return link;
-    }
-    return `https://${link}`;
-  };
   useEffect(() => {
     const fetchData = async (projectId: string) => {
       try {
         const result = await projectService.getById(projectId);
-        setProjectDetail({
-          id: result.id,
-          title: result.title,
-          summary: result.summary,
-          link: result.link,
-          owner: result.owner,
-          startDate: result.startDate,
-          endDate: result.endDate,
-        });
+        setProjectDetail(result);
       } catch (error) {
         swal("خطا", "ارتباط با سرور برقرار نشد!", "error");
       } finally {
@@ -64,21 +54,16 @@ const ProjectDetail = () => {
         </div>
       ) : (
         <>
-          <div
-            key={projectDetail.id}
-            className="group w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden hover:border-[var(--accent)] transition-all duration-300 flex flex-col md:flex-row h-auto md:h-52 shadow-md"
-          >
+          <div className="group w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden hover:border-[var(--accent)] transition-all duration-300 flex flex-col md:flex-row h-auto md:h-52 shadow-md">
             <div className="p-4 md:p-6 flex flex-col justify-between w-full md:w-2/3 lg:w-3/4">
               <div>
-                <h3 className="font-bold text-lg md:text-xl text-[var(--text)] mb-2 line-clamp-2 group-hover:text-[var(--accent)] transition-colors">
+                <h1 className="font-bold text-lg md:text-xl text-[var(--text)] mb-2 line-clamp-2 group-hover:text-[var(--accent)] transition-colors">
                   {projectDetail.title}
-                </h3>
+                </h1>
                 <p className="text-[var(--muted)] text-sm line-clamp-2 leading-relaxed md:block">
                   {projectDetail.summary}
                 </p>
-                <p className="text-[var(--muted)] text-sm line-clamp-2 leading-relaxed md:block">
-                  {projectDetail.owner}
-                </p>
+                <span>توسط {projectDetail.owner}</span>
                 <a
                   href={formatLink(projectDetail.link)}
                   target="_blank"

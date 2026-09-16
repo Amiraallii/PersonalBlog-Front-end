@@ -11,6 +11,21 @@ import { projectService } from "../services";
 import { convertToJalali } from "../../../utils/dateHelper";
 import { useInfiniteScroll } from "../../../hooks/useInfiniteScroll";
 import PageCacheManager from "../../../components/PageCacheManager";
+import type { Project } from "../types";
+const PAGE_SIZE = 10;
+
+interface ProjectItemsContentProps {
+  cachedItems: Project[];
+  cachedHasNextPage: boolean;
+  cachedTotalCount: number;
+  scrollY: number;
+  saveCache: (
+    items: Project[],
+    currentSkip: number,
+    hasNextPage: boolean,
+    totalCount: number,
+  ) => void;
+}
 
 const ProjectItemsContent = ({
   cachedItems,
@@ -18,7 +33,7 @@ const ProjectItemsContent = ({
   cachedTotalCount,
   scrollY,
   saveCache,
-}: any) => {
+}: ProjectItemsContentProps) => {
   const navigate = useNavigate();
 
   const formatLink = (link: string): string => {
@@ -28,15 +43,13 @@ const ProjectItemsContent = ({
       : `https://${link}`;
   };
 
-  const PAGE_SIZE = 10;
-
   const {
     items: projects,
     isLoading,
     hasNextPage,
     observerTarget,
     totalCount,
-  } = useInfiniteScroll({
+  } = useInfiniteScroll<Project>({
     pageSize: PAGE_SIZE,
     fetchData: async (currentSkip) => {
       if (cachedItems.length > 0 && currentSkip === 0) {
@@ -47,7 +60,7 @@ const ProjectItemsContent = ({
         };
       }
 
-      const data = (await projectService.getAll(PAGE_SIZE, currentSkip)) as any;
+      const data = await projectService.getAll(PAGE_SIZE, currentSkip);
 
       return {
         items: data.items || [],
@@ -66,10 +79,10 @@ const ProjectItemsContent = ({
     }
   }, [projects.length, scrollY]);
   useEffect(() => {
-    if (projects.length > 0) {
-      saveCache(projects, projects.length, hasNextPage, totalCount);
-    }
-  }, [projects.length, hasNextPage, totalCount]);
+  if (projects.length > 0) {
+    saveCache(projects, projects.length, hasNextPage, totalCount);
+  }
+}, [projects, hasNextPage, totalCount, saveCache]);
 
   return (
     <>
@@ -166,7 +179,7 @@ const ProjectItemsContent = ({
 
 export default function ProjectItems() {
   return (
-    <PageCacheManager cacheKey="projects_list">
+    <PageCacheManager<Project> cacheKey="projects_list">
       {(cacheProps) => <ProjectItemsContent {...cacheProps} />}
     </PageCacheManager>
   );

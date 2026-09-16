@@ -1,4 +1,4 @@
-import React, { Fragment, useState, type FormEvent } from "react";
+import React, { useState, type FormEvent } from "react";
 import { projectService } from "../services";
 import { useNavigate } from "react-router";
 import swal from "sweetalert";
@@ -6,7 +6,7 @@ import LocationPicker from "../../../components/Location/LocationPicker";
 import type { RequestProjectDTO } from "../types";
 
 const ProjectRequestForm = () => {
-  const [ProjectArr, setProject] = useState<RequestProjectDTO>({
+  const [formData, setFormData] = useState<RequestProjectDTO>({
     title: "",
     summary: "",
     location: "",
@@ -16,20 +16,22 @@ const ProjectRequestForm = () => {
 
   const navigate = useNavigate();
 
-  const handleChange = (e : React.ChangeEvent<HTMLInputElement>) => {
-    setProject({ ...ProjectArr, [e.target.name]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleSubmit = async (e : FormEvent<HTMLElement>) => {
-    setIsLoading(true);
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
-      await projectService.request(
-        ProjectArr
-      );
-        navigate("/Projects");
-      
+      await projectService.request(formData);
+      navigate("/Projects");
     } catch (error) {
       swal("خطا", "خطا در سرور", "error");
     } finally {
@@ -38,7 +40,6 @@ const ProjectRequestForm = () => {
   };
 
   return (
-    <Fragment>
       <div className="flex justify-center mt-10 pb-10">
         <div className="w-full max-w-4xl card p-6 rounded-xl border border-theme shadow-lg">
           <h2 className="text-xl font-bold mb-6 text-[var(--accent)] text-center border-b border-theme pb-4">
@@ -51,7 +52,7 @@ const ProjectRequestForm = () => {
                 <input
                   type="text"
                   name="title"
-                  value={ProjectArr.title}
+                  value={formData.title}
                   onChange={handleChange}
                   placeholder="چروندکلاب"
                   className="bg-[var(--background)] text-theme border border-theme px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--accent)] transition-colors"
@@ -63,7 +64,7 @@ const ProjectRequestForm = () => {
                 <input
                   type="text"
                   name="summary"
-                  value={ProjectArr.summary}
+                  value={formData.summary}
                   onChange={handleChange}
                   placeholder="شبکه اجتماعی فرهنگی برای حفظ و گسترش فرهنگ"
                   className="bg-[var(--background)] text-theme border border-theme px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--accent)] transition-colors"
@@ -73,9 +74,12 @@ const ProjectRequestForm = () => {
               <div className="flex flex-col gap-2">
                 <label className="text-sm text-muted pr-1">لوکیشن</label>
                 <LocationPicker
-                  value={ProjectArr.location}
+                  value={formData.location}
                   onChange={(val) =>
-                    setProject((prev) => ({ ...prev, location: val }))
+                    setFormData((prev) => ({
+                      ...prev,
+                      location: val,
+                    }))
                   }
                   showRadius={true}
                 />
@@ -85,7 +89,7 @@ const ProjectRequestForm = () => {
                 <input
                   type="text"
                   name="phoneNumber"
-                  value={ProjectArr.phoneNumber}
+                  value={formData.phoneNumber}
                   onChange={handleChange}
                   placeholder="09120252152"
                   className="bg-[var(--background)] text-theme border border-theme px-4 py-3 rounded-lg text-sm outline-none focus:border-[var(--accent)] transition-colors"
@@ -115,7 +119,6 @@ const ProjectRequestForm = () => {
           </form>
         </div>
       </div>
-    </Fragment>
   );
 };
 

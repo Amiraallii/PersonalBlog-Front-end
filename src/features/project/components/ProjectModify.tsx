@@ -1,10 +1,10 @@
-import { useState, type FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { projectService } from "../services";
 import { useNavigate } from "react-router";
 import swal from "sweetalert";
 import { DateObject } from "react-multi-date-picker";
 import Gregorian from "react-date-object/calendars/gregorian";
-import type { CreateProjectDTO } from "../types"; 
+import type { CreateProjectDTO } from "../types";
 import JalaliDatePicker from "../../../components/JalaliDatePicker";
 
 const ProjectInputForm = () => {
@@ -20,13 +20,21 @@ const ProjectInputForm = () => {
 
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormValues({ ...formValues, [e.target.name]: e.target.value });
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setFormValues((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
-const handleDateChange = (name: string, value: string) => {
-  setFormValues((prev) => ({ ...prev, [name]: value || null }));
-};
-  const handleSubmit = async (e: FormEvent<HTMLElement>) => {
+  const handleDateChange = (name: "startDate" | "endDate", value: string) => {
+    setFormValues((prev) => ({
+      ...prev,
+      [name]: value || null,
+    }));
+  };
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -61,7 +69,7 @@ const handleDateChange = (name: string, value: string) => {
                 required
               />
             </div>
-            
+
             <div className="flex flex-col gap-2">
               <label className="text-sm text-muted pr-1">خلاصه پروژه</label>
               <input
@@ -106,7 +114,9 @@ const handleDateChange = (name: string, value: string) => {
                 label="تاریخ شروع پروژه"
                 name="startDate"
                 value={formValues.startDate}
-                onChange={(e: any) => handleDateChange("startDate", e.target.value)}
+                onChange={(e: any) =>
+                  handleDateChange("startDate", e.target.value)
+                }
                 required
               />
             </div>
@@ -116,7 +126,9 @@ const handleDateChange = (name: string, value: string) => {
                 label="تاریخ پایان پروژه"
                 name="endDate"
                 value={formValues.endDate || ""}
-                onChange={(e: any) => handleDateChange("endDate", e.target.value)}
+                onChange={(e: any) =>
+                  handleDateChange("endDate", e.target.value)
+                }
               />
             </div>
           </div>
