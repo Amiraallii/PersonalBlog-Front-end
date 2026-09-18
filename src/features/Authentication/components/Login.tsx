@@ -4,18 +4,21 @@ import swal from "sweetalert";
 import { useAuth } from "../../../context/AuthContext";
 import { AuthService } from "../services";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-
+import type { LoginRequest } from "../types";
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [formData, setFormData] = useState({
-    LoginIdentifier: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState<LoginRequest>({
+  LoginIdentifier: "",
+  password: "",
+});
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -59,14 +62,14 @@ const Login = () => {
             <div className="relative flex items-center">
               <input
                 name="password"
-                type={showPassword ? "text" : "password"} 
+                type={showPassword ? "text" : "password"}
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="******"
                 className="w-full bg-[var(--background)] text-theme border border-theme pr-4 pl-12 py-3 rounded-lg text-sm outline-none focus:border-[var(--accent)] transition-colors"
                 required
               />
-              
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -75,7 +78,7 @@ const Login = () => {
                 {showPassword ? (
                   <EyeSlashIcon className="h-5 w-5" />
                 ) : (
-                  <EyeIcon className="h-5 w-5" /> 
+                  <EyeIcon className="h-5 w-5" />
                 )}
               </button>
             </div>

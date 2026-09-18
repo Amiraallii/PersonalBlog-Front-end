@@ -4,15 +4,15 @@ import swal from "sweetalert";
 import { useAuth } from "../../../context/AuthContext";
 import { AuthService } from "../services";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-
+import type { RegisterRequest } from "../types";
 const Register = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    userName: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState<RegisterRequest>({
+  fullName: "",
+  email: "",
+  userName: "",
+  password: "",
+});
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -36,7 +36,6 @@ const Register = () => {
         "error",
       );
     }
-    navigate("/");
   };
   return (
     <div className="flex justify-center mt-10">
