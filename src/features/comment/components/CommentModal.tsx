@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Dialog,
   Transition,
@@ -22,26 +22,21 @@ interface CommentModalProps {
   closeModal: () => void;
   postId: string;
 }
+const PAGE_SIZE = 10;
 
 const CommentModal = ({ isOpen, closeModal, postId }: CommentModalProps) => {
   const { isAuthenticated } = useAuth();
   const [localComments, setLocalComments] = useState<Comment[]>([]);
   const [parentId, setParentId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  const PAGE_SIZE = 10;
-  const {
-    items: fetchedItems,
-    isLoading,
-    hasNextPage,
-    observerTarget,
-    totalCount,
-    resetList
-  } = useInfiniteScroll({
-    pageSize: PAGE_SIZE,
-    fetchData: async (currentSkip) => {
+  const fetchComments = useCallback(
+    async (currentSkip: number) => {
       if (!isOpen || !postId) {
-        return { items: [], hasNextPage: false, totalCount: 0 };
+        return {
+          items: [],
+          hasNextPage: false,
+          totalCount: 0,
+        };
       }
 
       const data = await CommentService.getByPostId(
@@ -49,16 +44,28 @@ const CommentModal = ({ isOpen, closeModal, postId }: CommentModalProps) => {
         PAGE_SIZE,
         currentSkip,
       );
+
       return {
-        items: data.items || [],
+        items: data.items ?? [],
         hasNextPage: data.hasNextPage,
-        totalCount: data.totalCount || 0,
+        totalCount: data.totalCount ?? 0,
       };
     },
+    [isOpen, postId],
+  );
+  const {
+    items: fetchedItems,
+    isLoading,
+    hasNextPage,
+    observerTarget,
+    totalCount,
+    resetList,
+  } = useInfiniteScroll<Comment>({
+    pageSize: PAGE_SIZE,
+    fetchData: fetchComments,
   });
 
   useEffect(() => {
-
     if (fetchedItems && fetchedItems.length > 0) {
       setLocalComments((prev) => {
         const existingIds = new Set(prev.map((c) => c.id));
@@ -69,12 +76,11 @@ const CommentModal = ({ isOpen, closeModal, postId }: CommentModalProps) => {
   }, [fetchedItems]);
 
   useEffect(() => {
-
     if (!isOpen) {
       setLocalComments([]);
       resetList();
     }
-  }, [isOpen]);
+  }, [isOpen, resetList]);
 
   const handleSendComment = async (content: string) => {
     setIsSubmitting(true);
@@ -84,7 +90,7 @@ const CommentModal = ({ isOpen, closeModal, postId }: CommentModalProps) => {
         content,
         parentId,
       });
-      
+
       setLocalComments((prev) => [...prev, newComment]);
       setParentId(null);
       swal("موفق", "نظر شما با موفقیت ثبت شد", "success");
@@ -133,7 +139,12 @@ const CommentModal = ({ isOpen, closeModal, postId }: CommentModalProps) => {
               <DialogPanel className="fixed bottom-0 left-0 right-0 h-[80vh] flex flex-col transform overflow-hidden rounded-t-3xl bg-[var(--surface)] shadow-xl transition-all">
                 <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4 flex-shrink-0">
                   <DialogTitle className="text-lg font-semibold text-[var(--text)]">
-                    نظرات {totalCount > 0 && <span className="text-xs text-[var(--muted)]">({totalCount})</span>}
+                    نظرات{" "}
+                    {totalCount > 0 && (
+                      <span className="text-xs text-[var(--muted)]">
+                        ({totalCount})
+                      </span>
+                    )}
                   </DialogTitle>
                   <button
                     onClick={closeModal}
@@ -162,7 +173,7 @@ const CommentModal = ({ isOpen, closeModal, postId }: CommentModalProps) => {
                     )}
                     {!hasNextPage && localComments.length > 0 && (
                       <p className="text-xs text-[var(--muted)] text-center tracking-widest bg-[var(--surface)] px-4 py-2 rounded-full border border-[var(--border)]">
-                        شما به انتهای بخش تجربه ها رسیده‌اید
+                        شما به انتهای بخش نظرات ها رسیده‌اید
                       </p>
                     )}
                   </div>

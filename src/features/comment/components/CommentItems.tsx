@@ -17,6 +17,7 @@ interface PageInfo {
   skip: number;
   hasNextPage: boolean;
 }
+const PAGE_SIZE = 10;
 
 const CommentItems = ({
   comments,
@@ -25,22 +26,26 @@ const CommentItems = ({
   setParentId,
   onDeleteComment,
   onActionStart,
-  onActionEnd
+  onActionEnd,
 }: CommentItemsProps) => {
-  
   const [repliesMap, setRepliesMap] = useState<Record<string, Comment[]>>({});
-  const [loadingReplies, setLoadingReplies] = useState<Record<string, boolean>>({});
-  const [visibleRepliesState, setVisibleRepliesState] = useState<Record<string, boolean>>({});
-  
-  const [pageInfoMap, setPageInfoMap] = useState<Record<string, PageInfo>>({});
+  const [loadingReplies, setLoadingReplies] = useState<Record<string, boolean>>(
+    {},
+  );
+  const [visibleRepliesState, setVisibleRepliesState] = useState<
+    Record<string, boolean>
+  >({});
 
-  const PAGE_SIZE = 10;
+  const [pageInfoMap, setPageInfoMap] = useState<Record<string, PageInfo>>({});
 
   const handleToggleRepliesFetch = async (commentId: string | number) => {
     const idStr = String(commentId);
     const isCurrentlyVisible = !!visibleRepliesState[idStr];
-    
-    setVisibleRepliesState(prev => ({ ...prev, [idStr]: !isCurrentlyVisible }));
+
+    setVisibleRepliesState((prev) => ({
+      ...prev,
+      [idStr]: !isCurrentlyVisible,
+    }));
 
     if (isCurrentlyVisible || repliesMap[idStr]) return;
 
@@ -50,19 +55,23 @@ const CommentItems = ({
   const loadMoreReplies = async (parentIdStr: string, currentSkip: number) => {
     setLoadingReplies((prev) => ({ ...prev, [parentIdStr]: true }));
     try {
-      const data = await CommentService.getReplies(parentIdStr, currentSkip, PAGE_SIZE);
-      
+      const data = await CommentService.getReplies(
+        parentIdStr,
+        currentSkip,
+        PAGE_SIZE,
+      );
+
       setRepliesMap((prev) => ({
         ...prev,
-        [parentIdStr]: [...(prev[parentIdStr] || []), ...(data.items || [])]
+        [parentIdStr]: [...(prev[parentIdStr] || []), ...(data.items || [])],
       }));
 
       setPageInfoMap((prev) => ({
         ...prev,
         [parentIdStr]: {
           skip: currentSkip + PAGE_SIZE,
-          hasNextPage: data.hasNextPage 
-        }
+          hasNextPage: data.hasNextPage,
+        },
       }));
     } catch (error) {
       console.error("خطا در دریافت پاسخ‌ها:", error);
@@ -93,18 +102,20 @@ const CommentItems = ({
     );
   }
 
-  const rootComments = comments.filter(c => !c.parentId);
+  const rootComments = comments.filter((c) => !c.parentId);
 
   return (
     <>
       <div className="space-y-1">
         {rootComments.map((comment) => {
           const isReplySectionOpen = !!visibleRepliesState[comment.id];
-          const pageInfo = pageInfoMap[comment.id] || { skip: 0, hasNextPage: false };
+          const pageInfo = pageInfoMap[comment.id] || {
+            skip: 0,
+            hasNextPage: false,
+          };
 
           return (
             <div key={comment.id} className="w-full flex flex-col">
-              
               <CommentItem
                 comment={comment}
                 setParentId={setParentId}
@@ -117,7 +128,6 @@ const CommentItems = ({
 
               {isReplySectionOpen && (
                 <div className="mr-12 border-r border-[var(--border)] pr-3 space-y-1 mb-2 animate-fade-in">
-                  
                   {repliesMap[comment.id]?.map((reply) => (
                     <CommentItem
                       key={reply.id}
@@ -139,7 +149,9 @@ const CommentItems = ({
                   {pageInfo.hasNextPage && !loadingReplies[comment.id] && (
                     <div className="pt-1 pb-2">
                       <button
-                        onClick={() => loadMoreReplies(String(comment.id), pageInfo.skip)}
+                        onClick={() =>
+                          loadMoreReplies(String(comment.id), pageInfo.skip)
+                        }
                         className="text-xs text-[var(--muted)] hover:text-[var(--accent)] font-semibold transition-colors flex items-center gap-1.5"
                       >
                         <span className="w-4 h-[1px] bg-[var(--border)] inline-block"></span>
@@ -147,10 +159,8 @@ const CommentItems = ({
                       </button>
                     </div>
                   )}
-
                 </div>
               )}
-
             </div>
           );
         })}
