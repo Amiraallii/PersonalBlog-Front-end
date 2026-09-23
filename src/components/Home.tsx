@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
-
+import SEO from "../shared/seo/SEO";
 import { PostService } from "../features/post/services";
 import { projectService } from "../features/project/services";
 import type { Post } from "../features/post/types";
 import type { Project } from "../features/project/types";
 
 import { convertToJalali } from "../utils/dateHelper";
-import HorizontalScroll from "./ScrollsComponent/ScrollX"; 
+import HorizontalScroll from "./ScrollsComponent/ScrollX";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -35,7 +35,6 @@ const Home = () => {
     fetchData();
   }, []);
 
-
   if (loading) {
     return (
       <div className="rounded-2xl p-8 border card">
@@ -53,9 +52,16 @@ const Home = () => {
 
   return (
     <div className="space-y-12">
+      <SEO
+        title="Amirali Aghaei | امیرعلی آقایی"
+        description="بلاگ امیرعلی آقایی؛ مهندس نرم افزار و توسعه‌دهنده نرم‌افزار، نویسنده و علاقه‌مند به تکنولوژی و زندگی."
+        canonical="https://amirali.me/"
+      />
       <div className="rounded-2xl p-8 border card">
         <h1 className="text-4xl font-bold mb-4">خوش آمدید به بلاگ شخصی من</h1>
-        <p className="text-muted text-lg">اینجا درباره تجربیات، پروژه‌ها و یادگیری‌هایم می‌نویسم</p>
+        <p className="text-muted text-lg">
+          اینجا درباره تجربیات، پروژه‌ها و یادگیری‌هام می‌نویسم
+        </p>
       </div>
 
       <section className="rounded-2xl p-8 border card">
@@ -76,7 +82,7 @@ const Home = () => {
             posts.map((post) => (
               <div
                 key={post.id}
-                onClick={() => navigate(`/Posts/postdetail/${post.id}`)}
+                onClick={() => navigate(`/Posts/postdetail/${post.slug}`)}
                 className="p-4 border border-[var(--border)] rounded-lg hover:shadow-md transition-all cursor-pointer group"
               >
                 <div className="flex items-start gap-4">
@@ -84,8 +90,12 @@ const Home = () => {
                     <h3 className="font-bold text-lg mb-2 group-hover:text-[var(--accent)] transition-colors line-clamp-1">
                       {post.title}
                     </h3>
-                    <p className="text-muted text-sm mb-2 line-clamp-2">{post.summary}</p>
-                    <span className="text-xs text-muted">{convertToJalali(post.publishDate)}</span>
+                    <p className="text-muted text-sm mb-2 line-clamp-2">
+                      {post.summary}
+                    </p>
+                    <span className="text-xs text-muted">
+                      {convertToJalali(post.publishDate)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -108,7 +118,9 @@ const Home = () => {
         <div className="relative">
           <HorizontalScroll id="projects-container">
             {projects.length === 0 ? (
-              <p className="text-muted text-center py-8 w-full">هنوز پروژه‌ای اضافه نشده</p>
+              <p className="text-muted text-center py-8 w-full">
+                هنوز پروژه‌ای اضافه نشده
+              </p>
             ) : (
               projects.map((project) => (
                 <div
@@ -119,7 +131,9 @@ const Home = () => {
                   <h3 className="font-bold text-lg mb-2 group-hover:text-[var(--accent)] transition-colors">
                     {project.title}
                   </h3>
-                  <p className="text-muted text-sm line-clamp-3">{project.summary}</p>
+                  <p className="text-muted text-sm line-clamp-3">
+                    {project.summary}
+                  </p>
                 </div>
               ))
             )}

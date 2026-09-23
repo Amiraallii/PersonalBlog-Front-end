@@ -33,7 +33,7 @@ const AppRoutes = () => {
       <Route path="/Posts" element={<Posts />} />
 
       <Route
-        path="/Posts/postdetail/:id"
+        path="/Posts/postdetail/:slug"
         element={<PostDetail />}
       />
 

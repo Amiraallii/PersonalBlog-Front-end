@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-
+import { useCallback, useEffect, useState } from "react";
 interface InfiniteScrollResponse<T> {
   hasNextPage: boolean;
   items: T[];
@@ -63,12 +62,12 @@ export function useInfiniteScroll<T>({
     return () => observer.disconnect();
   }, [skip, hasNextPage, isLoading, fetchData, pageSize, targetElement]);
 
-  const resetList = () => {
-    setItems([]);
-    setSkip(0);
-    setHasNextPage(true);
-    setTotalCount(0);
-  };
+  const resetList = useCallback(() => {
+  setItems([]);
+  setSkip(0);
+  setHasNextPage(true);
+  setTotalCount(0);
+}, []);
 
   return {
     items,

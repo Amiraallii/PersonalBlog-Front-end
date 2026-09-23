@@ -21,6 +21,7 @@ export interface Post {
   summary: string;
   coverImageAddress: string;
   postContents: PostContent[] | null;
+  slug : string;
 }
 
 export interface CreatePostFormState {

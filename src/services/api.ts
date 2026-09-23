@@ -1,7 +1,6 @@
 import axios from "axios";
 import { env } from "../config/env";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://api.amirali.me";
 
 export const api = axios.create({
   baseURL: env.apiUrl,
@@ -27,12 +26,12 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem("refreshToken");
 
       if (!refreshToken) {
-        window.location.href = "/login"; 
+        window.location.href = "/Login"; 
         return Promise.reject(error);
       }
 
       try {
-        const res = await axios.post(`${API_URL}/api/Auth/RefreshToken`, {
+        const res = await axios.post(`${env.apiUrl}/api/Auth/RefreshToken`, {
           refreshToken,
         });
         const { accessToken, refreshToken: newRefreshToken } = res.data;
@@ -48,7 +47,7 @@ api.interceptors.response.use(
       } catch (authError) {
         localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
-        window.location.href = "/login";
+        window.location.href = "/Login";
         return Promise.reject(authError);
       }
     }

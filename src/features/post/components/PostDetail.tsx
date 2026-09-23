@@ -9,10 +9,10 @@ import { convertToJalali } from "../../../utils/dateHelper";
 import type { Post } from "../types";
 import { POST_CONTENT_TYPES } from "../constants/postContentTypes";
 import { env } from "../../../config/env";
-
+import SEO from "../../../shared/seo/SEO";
+import ArticleStructuredData from "../../../shared/seo/ArticleStructuredData";
 const PostDetail = () => {
-  const { id } = useParams<{ id: string }>();
-
+  const { slug } = useParams<{ slug: string }>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [postDetail, setPostDetail] = useState<Post>();
   const navigate = useNavigate();
@@ -28,6 +28,7 @@ const PostDetail = () => {
           publishDate: result.publishDate,
           postContents: result.postContents,
           coverImageAddress: result.coverImageAddress,
+          slug: result.slug,
         });
       } catch (error) {
         console.error("خطا در دریافت پست:", error);
@@ -41,6 +42,25 @@ const PostDetail = () => {
 
   return (
     <Fragment>
+      {postDetail && (
+        <>
+          <SEO
+            title={`${postDetail.title} | Amirali Aghaei`}
+            description={postDetail.summary}
+            canonical={`https://amirali.me/Posts/postdetail/${postDetail.slug}`}
+            image={`${env.mediaBaseUrl}/${postDetail.coverImageAddress}`}
+          />
+
+          <ArticleStructuredData
+            title={postDetail.title}
+            description={postDetail.summary}
+            url={`https://amirali.me/Posts/postdetail/${postDetail.slug}`}
+            image={`${env.mediaBaseUrl}/${postDetail.coverImageAddress}`}
+            datePublished={postDetail.publishDate}
+            authorName="Amirali Aghaei"
+          />
+        </>
+      )}
       <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden hover:border-[var(--accent)] transition-all duration-300 shadow-lg mt-6">
         <div className="relative">
           <RouteGuard allowedRoles={[ROLES.ADMIN]}>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+>
+  <url>
+    <loc>https://amirali.me/</loc>
+  </url>
+
+  <url>
+    <loc>https://amirali.me/AboutMe</loc>
+  </url>
+
+  <url>
+    <loc>https://amirali.me/Posts</loc>
+  </url>
+
+  <url>
+    <loc>https://amirali.me/Projects</loc>
+  </url>
+</urlset>

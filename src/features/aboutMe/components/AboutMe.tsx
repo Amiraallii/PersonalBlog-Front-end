@@ -8,7 +8,8 @@ import {
   GlobeAltIcon,
   PencilIcon,
 } from "@heroicons/react/16/solid";
-
+import SEO from "../../../shared/seo/SEO";
+import PersonStructuredData from "../../../shared/seo/PersonStructuredData";
 import { useAuth } from "../../../context/AuthContext";
 import { ROLES } from "../../../types/auth";
 import { AboutMeService } from "../services";
@@ -108,6 +109,24 @@ const AboutMeIndex = () => {
 
   return (
     <>
+      <SEO
+        title="درباره امیرعلی آقایی | Amirali Aghaei"
+        description="درباره امیرعلی آقایی پور؛ مهندس نرم‌افزار و توسعه‌دهنده نرم‌افزار."
+        canonical="https://amirali.me/AboutMe"
+      />
+
+      <PersonStructuredData
+        name="امیرعلی آقایی پور"
+        alternateName="Amirali Aghaei"
+        description="مهندس نرم‌افزار و توسعه‌دهنده نرم‌افزار."
+        sameAs={
+          [
+            "https://github.com/Amiraallii",
+            "https://www.linkedin.com/in/amiraallii/",
+            "https://charvandclub.com/"
+          ]
+        }
+      />
       <div className="w-full flex flex-col gap-4">
         {isLoading ? (
           <div className="flex justify-center items-center py-20">
@@ -208,9 +227,7 @@ const AboutMeIndex = () => {
                     const { lat, lng } = parsed;
 
                     return (
-                      <div
-                        className="mt-3 rounded-xl overflow-hidden border border-[var(--border)]"
-                      >
+                      <div className="mt-3 rounded-xl overflow-hidden border border-[var(--border)]">
                         <LocationPicker
                           value={locationContact.contactWay}
                           readOnly={true}
