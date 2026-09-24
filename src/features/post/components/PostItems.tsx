@@ -155,7 +155,7 @@ const PostItemsContent = ({
                     </div>
 
                     <button
-                      onClick={() => navigate(`/Posts/postdetail/${post.slug}`)}
+                      onClick={() => navigate(`/Posts/postdetail/${post.id}/${post.slug}`)}
                       className="text-xs bg-[rgba(255,255,255,0.05)] hover:bg-[var(--accent)] hover:text-black text-[var(--text)] border border-[var(--border)] px-4 py-2 rounded-lg transition-all duration-300"
                     >
                       مشاهده کامل

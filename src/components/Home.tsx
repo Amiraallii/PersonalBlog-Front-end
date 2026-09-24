@@ -82,7 +82,7 @@ const Home = () => {
             posts.map((post) => (
               <div
                 key={post.id}
-                onClick={() => navigate(`/Posts/postdetail/${post.slug}`)}
+                onClick={() => navigate(`/Posts/postdetail/${post.id}/${post.slug}`)}
                 className="p-4 border border-[var(--border)] rounded-lg hover:shadow-md transition-all cursor-pointer group"
               >
                 <div className="flex items-start gap-4">

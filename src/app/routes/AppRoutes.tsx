@@ -10,16 +10,9 @@ import {
   RequestNewProject,
 } from "../../features/project";
 
-import {
-  Posts,
-  PostDetail,
-  PostInputForm,
-} from "../../features/post";
+import { Posts, PostDetail, PostInputForm } from "../../features/post";
 
-import {
-  AboutMeIndex,
-  PersonalInfoForm,
-} from "../../features/aboutMe";
+import { AboutMeIndex, PersonalInfoForm } from "../../features/aboutMe";
 
 import { Login, Register } from "../../features/Authentication";
 
@@ -32,10 +25,7 @@ const AppRoutes = () => {
 
       <Route path="/Posts" element={<Posts />} />
 
-      <Route
-        path="/Posts/postdetail/:slug"
-        element={<PostDetail />}
-      />
+      <Route path="/Posts/postdetail/:id/:slug" element={<PostDetail />} />
 
       <Route
         path="/Posts/newPost"
@@ -57,10 +47,7 @@ const AppRoutes = () => {
 
       <Route path="/Projects" element={<Projects />} />
 
-      <Route
-        path="/Projects/Detail/:id"
-        element={<ProjectDetail />}
-      />
+      <Route path="/Projects/Detail/:id" element={<ProjectDetail />} />
 
       <Route
         path="/Projects/AddNewProject"

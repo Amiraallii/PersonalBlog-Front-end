@@ -106,6 +106,26 @@ const AboutMeIndex = () => {
         return value.startsWith("http") ? value : `https://${value}`;
     }
   };
+const getContactTitle = (type: number, value: string) => {
+    switch (type) {
+      case 0:
+        return `Phonenumber`;
+      case 1:
+        return `Email`;
+      case 2:
+        return 'Linkedin';
+      case 3:
+        return 'Telegram';
+      case 4:
+        return "WhatsApp";
+      case 5:
+        return "Instagram";
+      case 6:
+        return "X";
+      default:
+        return value.startsWith("http") ? value : `https://${value}`;
+    }
+  };
 
   return (
     <>
@@ -208,7 +228,8 @@ const AboutMeIndex = () => {
                             {getContactIcon(contact.contactWayType)}
                           </div>
                           <span className="text-[var(--text)] group-hover:text-[var(--accent)] transition-colors flex-1 truncate">
-                            {contact.contactWay}
+                            {getContactTitle(contact.contactWayType,
+                            contact.contactWay,)}
                           </span>
                         </a>
                       ),

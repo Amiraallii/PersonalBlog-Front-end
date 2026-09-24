@@ -12,7 +12,9 @@ import { env } from "../../../config/env";
 import SEO from "../../../shared/seo/SEO";
 import ArticleStructuredData from "../../../shared/seo/ArticleStructuredData";
 const PostDetail = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { id } = useParams<{
+    id: string;
+  }>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [postDetail, setPostDetail] = useState<Post>();
   const navigate = useNavigate();
@@ -47,14 +49,14 @@ const PostDetail = () => {
           <SEO
             title={`${postDetail.title} | Amirali Aghaei`}
             description={postDetail.summary}
-            canonical={`https://amirali.me/Posts/postdetail/${postDetail.slug}`}
+            canonical={`https://amirali.me/Posts/postdetail/${id}/${postDetail.slug}`}
             image={`${env.mediaBaseUrl}/${postDetail.coverImageAddress}`}
           />
 
           <ArticleStructuredData
             title={postDetail.title}
             description={postDetail.summary}
-            url={`https://amirali.me/Posts/postdetail/${postDetail.slug}`}
+            url={`https://amirali.me/Posts/postdetail/${id}/${postDetail.slug}`}
             image={`${env.mediaBaseUrl}/${postDetail.coverImageAddress}`}
             datePublished={postDetail.publishDate}
             authorName="Amirali Aghaei"

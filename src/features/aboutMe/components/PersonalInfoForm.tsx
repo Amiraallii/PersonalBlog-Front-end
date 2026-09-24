@@ -8,13 +8,13 @@ import { LocationPicker, parseLocation } from "../../../components/Location";
 
 const contactWayTypes = [
   { value: 0, label: "شماره تماس" },
-  { value: 1, label: "آدرس" },
+  { value: 1, label: "Address" },
   { value: 2, label: "LinkedIn" },
-  { value: 3, label: "WhatsApp" },
-  { value: 4, label: "Telegram" },
+  { value: 3, label: "Telegram" },
+  { value: 4, label: "WhatsApp" },
   { value: 5, label: "Instagram" },
   { value: 6, label: "Twitter" },
-  { value: 7, label: "ایمیل" },
+  { value: 7, label: "Email" },
   { value: 8, label: "Location" },
 ];
 
