@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { PostService } from "../services/index";
 import { CalendarIcon, PencilIcon } from "@heroicons/react/16/solid";
 import CommentModal from "../../comment/components/CommentModal";
-import { RouteGuard } from "../../../components/RouteGuard";
 import { ROLES } from "../../../types/auth";
 import { convertToJalali } from "../../../utils/dateHelper";
 import type { Post } from "../types";
@@ -11,6 +10,7 @@ import { POST_CONTENT_TYPES } from "../constants/postContentTypes";
 import { env } from "../../../config/env";
 import SEO from "../../../shared/seo/SEO";
 import ArticleStructuredData from "../../../shared/seo/ArticleStructuredData";
+import { useAuth } from "../../../context/AuthContext";
 const PostDetail = () => {
   const { id } = useParams<{
     id: string;
@@ -18,6 +18,7 @@ const PostDetail = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [postDetail, setPostDetail] = useState<Post>();
   const navigate = useNavigate();
+  const { isAuthenticated, role, isLoading } = useAuth();
   useEffect(() => {
     const getPost = async (postId: string) => {
       try {
@@ -65,15 +66,15 @@ const PostDetail = () => {
       )}
       <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden hover:border-[var(--accent)] transition-all duration-300 shadow-lg mt-6">
         <div className="relative">
-          <RouteGuard allowedRoles={[ROLES.ADMIN]}>
-            <button
+          {!isLoading && isAuthenticated && role === ROLES.ADMIN && (
+          <button
               onClick={() => navigate(`/Posts/newPost/${id}`)}
               className="absolute top-4 left-4 z-10 p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors backdrop-blur-sm"
               title="ویرایش"
             >
               <PencilIcon className="w-5 h-5 text-white" />
             </button>
-          </RouteGuard>
+        )}
           <img
             className="w-full object-cover max-h-[400px]"
             src={`${env.mediaBaseUrl}/${postDetail?.coverImageAddress}`}
