@@ -1,68 +1,126 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { jwtDecode } from "jwt-decode";
 
-interface JwtPayload {
-  sub: string;
-  role: string;
-  exp: number;
-}
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+
+import keycloak from "../auth/keycloak";
 
 interface AuthContextType {
   isAuthenticated: boolean;
   role: string | null;
   currentUserId: string | null;
-  login: (accessToken: string, refreshToken: string) => void;
+  login: () => void;
+  register: () => void;
   logout: () => void;
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true); 
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    let mounted = true;
+
+    const syncAuthState = () => {
+      if (!mounted) return;
+
+      const authenticated = Boolean(keycloak.authenticated);
+      const token = keycloak.tokenParsed;
+      setIsAuthenticated(authenticated);
+      setCurrentUserId(
+        authenticated && token?.sub ? token.sub : null,
+      );
+
+      const realmRoles =
+        (token?.realm_access as { roles?: string[] } | undefined)
+          ?.roles ?? [];
+
+      setRole(
+        realmRoles.find((item) =>
+          ["admin", "user"].includes(item.toLocaleLowerCase()),
+        ) ?? null,
+      );
+    };
+
+    const initialize = async () => {
       try {
-        const decoded = jwtDecode<JwtPayload>(token);
+        await keycloak.init({
+          onLoad: "check-sso",
+          pkceMethod: "S256",
+          checkLoginIframe: false,
+        });
+console.log("ACCESS TOKEN:", keycloak.token);
+        syncAuthState();
 
-        if (decoded.exp * 1000 > Date.now()) {
-          setCurrentUserId(decoded.sub);
-          setRole(decoded.role);
-          setIsAuthenticated(true);
-        } else {
-          logout();
+        keycloak.onAuthSuccess = syncAuthState;
+        keycloak.onAuthRefreshSuccess = syncAuthState;
+        keycloak.onAuthLogout = syncAuthState;
+        keycloak.onAuthRefreshError = syncAuthState;
+      } catch (error) {
+        console.error("Keycloak initialization failed:", error);
+
+        if (mounted) {
+          setIsAuthenticated(false);
+          setCurrentUserId(null);
+          setRole(null);
         }
-      } catch {
-        logout();
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
-    }
-    setIsLoading(false);
-  } , []);
+    };
 
-  const login = (accessToken: string, refreshToken: string) => {
-    const decoded = jwtDecode<JwtPayload>(accessToken);
-    localStorage.setItem("token", accessToken);
-    localStorage.setItem("refreshToken", refreshToken);
-    setRole(decoded.role);
-    setCurrentUserId(decoded.sub);
-    setIsAuthenticated(true);
+    void initialize();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const login = () => {
+    void keycloak.login({
+      redirectUri: `${window.location.origin}/`,
+    });
+  };
+
+  const register = () => {
+    void keycloak.register({
+      redirectUri: `${window.location.origin}/`,
+    });
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
-    setCurrentUserId(null);
-    setRole(null);
-    setIsAuthenticated(false);
+    void keycloak.logout({
+      redirectUri: `${window.location.origin}/Login`,
+    });
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, role, currentUserId, isLoading }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        role,
+        currentUserId,
+        login,
+        register,
+        logout,
+        isLoading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -70,8 +128,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
+
   if (!context) {
     throw new Error("useAuth باید داخل AuthProvider استفاده شود.");
   }
+
   return context;
 };

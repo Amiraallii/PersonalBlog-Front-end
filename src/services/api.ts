@@ -1,6 +1,11 @@
-import axios from "axios";
-import { env } from "../config/env";
+import axios, { type InternalAxiosRequestConfig } from "axios";
 
+import { env } from "../config/env";
+import keycloak from "../auth/keycloak";
+
+type AuthenticatedRequestConfig = InternalAxiosRequestConfig & {
+  _retry?: boolean;
+};
 
 export const api = axios.create({
   baseURL: env.apiUrl,
@@ -9,48 +14,59 @@ export const api = axios.create({
   },
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.request.use(async (config) => {
+  if (keycloak.authenticated) {
+    try {
+      await keycloak.updateToken(30);
+
+      if (keycloak.token) {
+        config.headers.Authorization = `Bearer ${keycloak.token}`;
+      }
+    } catch (error) {
+      console.error("Failed to refresh Keycloak token", error);
+      keycloak.login();
+      return Promise.reject(error);
+    }
   }
+
   return config;
 });
 
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      const refreshToken = localStorage.getItem("refreshToken");
+    const originalRequest = error.config as
+      | AuthenticatedRequestConfig
+      | undefined;
 
-      if (!refreshToken) {
-        window.location.href = "/Login"; 
-        return Promise.reject(error);
-      }
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true;
 
       try {
-        const res = await axios.post(`${env.apiUrl}/api/Auth/RefreshToken`, {
-          refreshToken,
-        });
-        const { accessToken, refreshToken: newRefreshToken } = res.data;
+        if (!keycloak.authenticated) {
+          throw new Error("User is not authenticated.");
+        }
 
-        localStorage.setItem("token", accessToken);
-        localStorage.setItem("refreshToken", newRefreshToken);
+        await keycloak.updateToken(-1);
 
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        if (keycloak.token) {
+          originalRequest.headers.Authorization = `Bearer ${keycloak.token}`;
         }
 
         return api(originalRequest);
       } catch (authError) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("refreshToken");
-        window.location.href = "/Login";
+        await keycloak.login({
+          redirectUri: `${window.location.origin}/Login`,
+        });
+
         return Promise.reject(authError);
       }
     }
+
     return Promise.reject(error);
   },
 );

@@ -27,15 +27,11 @@ const Navbar = () => {
     { path: "/Posts", label: "بلاگ", icon: BookOpenIcon },
   ];
 
-  const handleLogout = async () => {
-    try {
-      await api.post("/api/Auth/Logout");
-      logout();
-      navigate("/login");
-    } catch {
-      swal("خطا", "ارتباط با سرور برقرار نشد!", "error");
-    }
-  };
+  
+const handleLogout = () => {
+  logout();
+};
+
 
   return (
     <>
